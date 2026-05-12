@@ -16,7 +16,8 @@ contract FundMe {
     address[] public funders;
 
     // Could we make this constant?  /* hint: no! We should make it immutable! */
-    address public /* immutable */ i_owner;
+    address public immutable i_owner;
+    // Minimun amount of USD to fund is 5 USD
     uint256 public constant MINIMUM_USD = 5 * 10 ** 18;
 
     constructor() {
@@ -48,6 +49,7 @@ contract FundMe {
 
     function withdraw() public onlyOwner {
         for (
+            // Index initialization
             uint256 funderIndex = 0;
             funderIndex < funders.length;
             funderIndex++
