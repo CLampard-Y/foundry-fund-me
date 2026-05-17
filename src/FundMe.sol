@@ -12,8 +12,8 @@ error NotOwner();
 contract FundMe {
     using PriceConverter for uint256;
 
-    mapping(address => uint256) public addressToAmountFunded;
-    address[] public funders;
+    mapping(address => uint256) private s_addressToAmountFunded;
+    address[] public s_funders;
 
     // Could we make this constant?  /* hint: no! We should make it immutable! */
     address public immutable i_owner;
@@ -32,8 +32,8 @@ contract FundMe {
             "You need to spend more ETH!"
         );
         // require(PriceConverter.getConversionRate(msg.value) >= MINIMUM_USD, "You need to spend more ETH!");
-        addressToAmountFunded[msg.sender] += msg.value;
-        funders.push(msg.sender);
+        s_addressToAmountFunded[msg.sender] += msg.value;
+        s_funders.push(msg.sender);
     }
 
     function getVersion() public view returns (uint256) {
@@ -50,13 +50,13 @@ contract FundMe {
         for (
             // Index initialization
             uint256 funderIndex = 0;
-            funderIndex < funders.length;
+            funderIndex < s_funders.length;
             funderIndex++
         ) {
-            address funder = funders[funderIndex];
-            addressToAmountFunded[funder] = 0;
+            address funder = s_funders[funderIndex];
+            s_addressToAmountFunded[funder] = 0;
         }
-        funders = new address[](0);
+        s_funders = new address[](0);
         // // transfer
         // payable(msg.sender).transfer(address(this).balance);
 
@@ -88,6 +88,17 @@ contract FundMe {
 
     receive() external payable {
         fund();
+    }
+
+    /** Getter Functions */
+    function getAddressToAmountFunded(
+        address fundingAddress
+    ) public view returns (uint256) {
+        return s_addressToAmountFunded[fundingAddress];
+    }
+
+    function getFunder(uint256 index) public view returns (address) {
+        return s_funders[index];
     }
 }
 
