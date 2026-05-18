@@ -82,6 +82,24 @@ contract FundMe {
     //  /        \
     //receive()  fallback()
 
+    function cheaperWithdraw() public onlyOwner {
+        uint256 fundersLength = s_funders.length;
+        for (
+            uint256 funderindex = 0;
+            funderindex < fundersLength;
+            funderindex++
+        ) {
+            address funder = s_funders[funderindex];
+            s_addressToAmountFunded[funder] = 0;
+        }
+        s_funders = new address[](0);
+
+        (bool callSuccess, ) = payable(msg.sender).call{
+            value: address(this).balance
+        }("");
+        require(callSuccess, "Call failed");
+    }
+
     fallback() external payable {
         fund();
     }
@@ -103,6 +121,10 @@ contract FundMe {
 
     function getOwner() public view returns (address) {
         return i_owner;
+    }
+
+    function getPriceFeed() public view returns (AggregatorV3Interface) {
+        return s_priceFeed;
     }
 }
 

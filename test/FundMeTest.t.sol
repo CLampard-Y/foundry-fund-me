@@ -3,6 +3,7 @@
 pragma solidity ^0.8.19;
 
 import {Test} from "forge-std/Test.sol";
+import {console} from "forge-std/console.sol";
 import {FundMe} from "../src/FundMe.sol";
 import {DeployFundMe} from "../script/DeployFundMe.s.sol";
 
@@ -13,6 +14,7 @@ contract FundMeTest is Test {
     uint256 public constant SEND_VALUE = 0.1 ether;
     uint256 public constant STARTING_BALANCE = 10 ether;
     uint160 public constant NUMBER_OF_FUNDERS = 10;
+    uint256 constant GAS_PRICE = 1;
 
     function setUp() external {
         // us -> FundMeTest -> FundMe
@@ -145,5 +147,14 @@ contract FundMeTest is Test {
             (numberOfFunders + 1) * SEND_VALUE ==
                 fundMe.getOwner().balance - startingOwnerBalance
         );
+    }
+
+    function testPrintStorageData() public view {
+        for (uint256 i = 0; i < 3; i++) {
+            bytes32 value = vm.load(address(fundMe), bytes32(i));
+            console.log("Value at location", i, ":");
+            console.logBytes32(value);
+        }
+        console.log("PriceFeed address:", address(fundMe.getPriceFeed()));
     }
 }
