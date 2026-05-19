@@ -83,6 +83,7 @@ contract FundMe {
     //receive()  fallback()
 
     function cheaperWithdraw() public onlyOwner {
+        // key difference: we don't need to read length of array every time
         uint256 fundersLength = s_funders.length;
         for (
             uint256 funderindex = 0;
