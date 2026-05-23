@@ -16,6 +16,7 @@ library PriceConverter {
         // https://docs.chain.link/data-feeds/price-feeds/addresses
         (, int256 answer, , , ) = priceFeed.latestRoundData();
         // ETH/USD rate in 18 digit
+        require(answer > 0, "Invalid price");
         return uint256(answer * 10000000000);
     }
 
