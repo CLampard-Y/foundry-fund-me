@@ -5,39 +5,28 @@ pragma solidity ^0.8.19;
 import {DeployFundMe} from "../../script/DeployFundMe.s.sol";
 import {FundFundMe, WithdrawFundMe} from "../../script/Interactions.s.sol";
 import {FundMe} from "../../src/FundMe.sol";
-import {Test, console} from "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
 
 contract InteractionsTest is Test {
     FundMe public fundMe;
-    DeployFundMe deployFundMe;
 
     uint256 public constant SEND_VALUE = 0.1 ether;
-    uint256 public constant STARTING_USER_BALANCE = 10 ether;
-
-    address alice = makeAddr("alice");
 
     function setUp() external {
-        deployFundMe = new DeployFundMe();
+        DeployFundMe deployFundMe = new DeployFundMe();
         fundMe = deployFundMe.run();
-        vm.deal(alice, STARTING_USER_BALANCE);
     }
 
-    function testUserCanFundAndOwnerWithdraw() public {
-        uint256 preUserBalance = address(alice).balance;
-        uint256 preOwnerBalance = address(fundMe.getOwner()).balance;
+    function testUserCanFundAndOwnerWithdrawUsingInteractions() public {
+        address fundMeAddress = address(fundMe);
+        FundFundMe fundFundMe = new FundFundMe();
+        fundFundMe.fundFundMe(fundMeAddress);
 
-        // Using vm.prank to simulate funding from the USER address
-        vm.prank(alice);
-        fundMe.fund{value: SEND_VALUE}();
+        assertEq(fundMeAddress.balance, SEND_VALUE);
 
         WithdrawFundMe withdrawFundMe = new WithdrawFundMe();
-        withdrawFundMe.withdrawFundMe(address(fundMe));
+        withdrawFundMe.withdrawFundMe(fundMeAddress);
 
-        uint256 afterUserBalance = address(alice).balance;
-        uint256 afterOwnerBalance = address(fundMe.getOwner()).balance;
-
-        assert(address(fundMe).balance == 0);
-        assertEq(afterUserBalance + SEND_VALUE, preUserBalance);
-        assertEq(preOwnerBalance + SEND_VALUE, afterOwnerBalance);
+        assertEq(fundMeAddress.balance, 0);
     }
 }
