@@ -32,7 +32,7 @@ library PriceConverter {
         // ETH/USD rate in 18 digit
         //require(answer > 0, "Invalid price");
         if (answer <= 0) revert PriceConverter_InvalidPrice();
-        if (updatedAt == 0 || block.timestamp - updatedAt > STALE_PRICE_TIMEOUT || updatedAt > block.timestamp) {
+        if (updatedAt == 0 || updatedAt > block.timestamp || block.timestamp - updatedAt > STALE_PRICE_TIMEOUT) {
             revert PriceConverter_StalePrice();
         }
 

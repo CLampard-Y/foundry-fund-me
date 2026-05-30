@@ -5,13 +5,13 @@ pragma solidity ^0.8.19;
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 import {PriceConverter} from "./PriceConverter.sol";
 
-// custom errors
-error NotOwner();
-error InvalidPriceFeed();
-error FundMe_NotEnoughFunds();
-error FundMe_CallFailed();
-
 contract FundMe {
+    // custom errors
+    error FundMe__NotOwner();
+    error FundMe__InvalidPriceFeed();
+    error FundMe__NotEnoughFunds();
+    error FundMe__CallFailed();
+
     using PriceConverter for uint256;
 
     event Funded(address indexed funder, uint256 amount);
@@ -31,7 +31,7 @@ contract FundMe {
 
     constructor(address priceFeed) {
         if (priceFeed == address(0)) {
-            revert InvalidPriceFeed();
+            revert FundMe__InvalidPriceFeed();
         }
         i_owner = msg.sender;
         i_priceFeed = AggregatorV3Interface(priceFeed);
@@ -39,7 +39,7 @@ contract FundMe {
 
     function fund() public payable {
         if (msg.value.getConversionRate(i_priceFeed) < MINIMUM_USD) {
-            revert FundMe_NotEnoughFunds();
+            revert FundMe__NotEnoughFunds();
         }
         // require(PriceConverter.getConversionRate(msg.value) >= MINIMUM_USD, "You need to spend more ETH!");
         // will lead to repeated push
@@ -59,7 +59,7 @@ contract FundMe {
 
     modifier onlyOwner() {
         // require(msg.sender == owner);
-        if (msg.sender != i_owner) revert NotOwner();
+        if (msg.sender != i_owner) revert FundMe__NotOwner();
         _;
     }
 
@@ -102,7 +102,7 @@ contract FundMe {
     */
 
     // Cheaper version
-    function Withdraw() public onlyOwner {
+    function withdraw() public onlyOwner {
         // key difference: we don't need to read length of array every time
         uint256 fundersLength = s_funders.length;
         for (uint256 funderindex = 0; funderindex < fundersLength; funderindex++) {
@@ -116,7 +116,7 @@ contract FundMe {
 
         (bool callSuccess,) = payable(msg.sender).call{value: amount}("");
         if (!callSuccess) {
-            revert FundMe_CallFailed();
+            revert FundMe__CallFailed();
         }
 
         emit Withdrawn(msg.sender, amount);
@@ -138,7 +138,7 @@ contract FundMe {
         return MINIMUM_USD;
     }
 
-    function getAddressToAmountFunded(address fundingAddress) public view returns (uint256) {
+    function getAmountFundedByAddress(address fundingAddress) public view returns (uint256) {
         return s_addressToAmountFunded[fundingAddress];
     }
 

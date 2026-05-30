@@ -35,11 +35,11 @@ contract FundMeTest is Test {
     }
 
     function testMinimumDollarIsFive() public view {
-        assertEq(fundMe.MINIMUM_USD(), 5e18);
+        assertEq(fundMe.getMinimumUsd(), 5e18);
     }
 
     function testOwnerIsMsgSender() public view {
-        assertEq(fundMe.getOwner(), msg.sender);
+        assertEq(fundMe.getOwnerAddress(), msg.sender);
     }
 
     function testPriceFeedVersionIsAccurate() public view {
@@ -53,14 +53,14 @@ contract FundMeTest is Test {
     }
 
     function testFundFailsWithoutEnoughETH() public {
-        vm.expectRevert("You need to spend more ETH!");
+        vm.expectRevert(FundMe.FundMe__NotEnoughFunds.selector);
         fundMe.fund{value: 1}();
     }
 
     function testFundUpdatesFundDataStructure() public {
         vm.prank(alice);
         fundMe.fund{value: SEND_VALUE}();
-        uint256 amountFunded = fundMe.getAddressToAmountFunded(alice);
+        uint256 amountFunded = fundMe.getAmountFundedByAddress(alice);
         assertEq(amountFunded, SEND_VALUE);
     }
 
@@ -69,7 +69,7 @@ contract FundMeTest is Test {
         fundMe.fund{value: SEND_VALUE}();
         vm.stopPrank();
 
-        address funder = fundMe.getFunder(0);
+        address funder = fundMe.getFunderAddressByIndex(0);
         assertEq(funder, alice);
     }
 
@@ -93,16 +93,16 @@ contract FundMeTest is Test {
     function testWithdrawFromASingleFunder() public funded {
         // Arrange
         uint256 startingFundMeBalance = address(fundMe).balance;
-        uint256 startingOwnerBalance = fundMe.getOwner().balance;
+        uint256 startingOwnerBalance = fundMe.getOwnerAddress().balance;
 
         // Act
-        vm.startPrank(fundMe.getOwner());
+        vm.startPrank(fundMe.getOwnerAddress());
         fundMe.withdraw();
         vm.stopPrank();
 
         // Assert
         uint256 endingFundMeBalance = address(fundMe).balance;
-        uint256 endingOwnerBalance = fundMe.getOwner().balance;
+        uint256 endingOwnerBalance = fundMe.getOwnerAddress().balance;
         assertEq(endingFundMeBalance, 0);
         assertEq(startingFundMeBalance + startingOwnerBalance, endingOwnerBalance);
     }
@@ -123,17 +123,17 @@ contract FundMeTest is Test {
         }
 
         uint256 startingFundMeBalance = address(fundMe).balance;
-        uint256 startingOwnerBalance = fundMe.getOwner().balance;
+        uint256 startingOwnerBalance = fundMe.getOwnerAddress().balance;
 
         // Act
-        vm.startPrank(fundMe.getOwner());
+        vm.startPrank(fundMe.getOwnerAddress());
         fundMe.withdraw();
         vm.stopPrank();
 
         // Assert
         assert(address(fundMe).balance == 0);
-        assert(startingFundMeBalance + startingOwnerBalance == fundMe.getOwner().balance);
-        assert((numberOfFunders + 1) * SEND_VALUE == fundMe.getOwner().balance - startingOwnerBalance);
+        assert(startingFundMeBalance + startingOwnerBalance == fundMe.getOwnerAddress().balance);
+        assert((numberOfFunders + 1) * SEND_VALUE == fundMe.getOwnerAddress().balance - startingOwnerBalance);
     }
 
     function testWithdrawFromMultipleFundersCheaper() public funded {
@@ -146,15 +146,15 @@ contract FundMeTest is Test {
         }
 
         uint256 startingFundMeBalance = address(fundMe).balance;
-        uint256 startingOwnerBalance = fundMe.getOwner().balance;
+        uint256 startingOwnerBalance = fundMe.getOwnerAddress().balance;
 
-        vm.startPrank(fundMe.getOwner());
-        fundMe.cheaperWithdraw();
+        vm.startPrank(fundMe.getOwnerAddress());
+        fundMe.withdraw();
         vm.stopPrank();
 
         assert(address(fundMe).balance == 0);
-        assert(startingFundMeBalance + startingOwnerBalance == fundMe.getOwner().balance);
-        assert((numberOfFunders + 1) * SEND_VALUE == fundMe.getOwner().balance - startingOwnerBalance);
+        assert(startingFundMeBalance + startingOwnerBalance == fundMe.getOwnerAddress().balance);
+        assert((numberOfFunders + 1) * SEND_VALUE == fundMe.getOwnerAddress().balance - startingOwnerBalance);
     }
 
     function testPrintStorageData() public view {
