@@ -32,14 +32,18 @@ contract PriceConverterTest is Test {
     }
 
     function testGetPriceRevertsIfPriceIsZero() public {
-        mockPriceFeed.updateAnswer(0);
+        //mockPriceFeed.updateAnswer(0);
+        // More precise mock
+        mockPriceFeed.updateRoundData(1, 0, block.timestamp, block.timestamp);
 
         vm.expectRevert(PriceConverter.PriceConverter__InvalidPrice.selector);
         harness.getPrice(mockPriceFeed);
     }
 
     function testGetPriceRevertsIfPriceIsNegative() public {
-        mockPriceFeed.updateAnswer(-1);
+        //mockPriceFeed.updateAnswer(-1);
+        // More precise mock
+        mockPriceFeed.updateRoundData(1, -1, block.timestamp, block.timestamp);
 
         vm.expectRevert(PriceConverter.PriceConverter__InvalidPrice.selector);
         harness.getPrice(mockPriceFeed);
@@ -48,17 +52,24 @@ contract PriceConverterTest is Test {
     function testGetPriceRevertsIfPriceIsStale() public {
         vm.warp(10 hours);
 
-        uint256 staleTimestamp = block.timestamp - 4 hours;
-        mockPriceFeed.updateRoundData(1, INITIAL_PRICE, staleTimestamp, staleTimestamp);
+        uint256 staleUpdatedAt = block.timestamp - 4 hours;
+        mockPriceFeed.updateRoundData(1, INITIAL_PRICE, staleUpdatedAt, staleUpdatedAt);
 
         vm.expectRevert(PriceConverter.PriceConverter__StalePrice.selector);
         harness.getPrice(mockPriceFeed);
     }
 
     function testGetPriceRevertsIfUpdatedAtIsInFuture() public {
-        uint256 futureTimestamp = block.timestamp + 1 hours;
+        uint256 futureUpdatedAt = block.timestamp + 1 hours;
 
-        mockPriceFeed.updateRoundData(1, INITIAL_PRICE, futureTimestamp, block.timestamp);
+        mockPriceFeed.updateRoundData(1, INITIAL_PRICE, futureUpdatedAt, block.timestamp);
+
+        vm.expectRevert(PriceConverter.PriceConverter__StalePrice.selector);
+        harness.getPrice(mockPriceFeed);
+    }
+
+    function testGetPriceRevertsIfUpdatedAtIsZero() public {
+        mockPriceFeed.updateRoundData(1, INITIAL_PRICE, 0, block.timestamp);
 
         vm.expectRevert(PriceConverter.PriceConverter__StalePrice.selector);
         harness.getPrice(mockPriceFeed);
@@ -70,6 +81,9 @@ contract PriceConverterTest is Test {
         assertEq(price, 2000e18);
     }
 
+    // Dont change decimals by updateRoundData
+    // decimals is price feed contract-level setting
+    // not rounddata-level information
     function testGetPriceScalesSixDecimalsToEighteenDecimals() public {
         MockV3Aggregator sixDecimalFeed = new MockV3Aggregator(6, 2000e6);
 
