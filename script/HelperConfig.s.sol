@@ -7,6 +7,9 @@ import {FundMe} from "../src/FundMe.sol";
 import {MockV3Aggregator} from "../test/mocks/MockV3Aggregator.sol";
 
 contract HelperConfig is Script {
+    error HelperConfig__UnsupportedChainId(uint256 chainId);
+    error HelperConfig__InvalidPriceFeed(uint256 chainId);
+
     // If on a local anvil,deploy mocks
     // Otherwise, grab the existing address from the live network
     NetworkConfig public activeNetworkConfig;
@@ -19,16 +22,20 @@ contract HelperConfig is Script {
     }
 
     constructor() {
+        // Use if-else to support fail fast
         if (block.chainid == 11155111) {
             activeNetworkConfig = getSepoliaEthConfig();
-        }
-
-        if (block.chainid == 31337) {
+        } else if (block.chainid == 31337) {
             activeNetworkConfig = getOrCreateAnvilEthConfig();
+        } else if (block.chainid == 1) {
+            activeNetworkConfig = getMainnetEthConfig();
+        } else {
+            revert HelperConfig__UnsupportedChainId(block.chainid);
         }
 
-        if (block.chainid == 1) {
-            activeNetworkConfig = getMainnetEthConfig();
+        // defensive post-condition check
+        if (activeNetworkConfig.priceFeed == address(0)) {
+            revert HelperConfig__InvalidPriceFeed(block.chainid);
         }
     }
 
