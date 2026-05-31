@@ -32,13 +32,28 @@ library PriceConverter {
         // ETH/USD rate in 18 digit
         //require(answer > 0, "Invalid price");
         if (answer <= 0) revert PriceConverter__InvalidPrice();
-        if (updatedAt == 0 || updatedAt > block.timestamp || block.timestamp - updatedAt > STALE_PRICE_TIMEOUT) {
+
+        if (updatedAt == 0) revert PriceConverter__StalePrice();
+
+        // Price freshness uses an hour-level timeout, so minor validator timestamp drift
+        // does not affect this stale-price security assumption.
+        // forge-lint: disable-next-line(block-timestamp)
+        if (updatedAt > block.timestamp) revert PriceConverter__StalePrice();
+
+        // Price freshness uses an hour-level timeout, so minor validator timestamp drift
+        // does not affect this stale-price security assumption.
+        // forge-lint: disable-next-line(block-timestamp)
+        if (block.timestamp - updatedAt > STALE_PRICE_TIMEOUT) {
             revert PriceConverter__StalePrice();
         }
 
+        // casting to uint256 is safe because non-positive prices revert above
+        // forge-lint: disable-next-line(unsafe-typecast)
+        uint256 unsignedAnswer = uint256(answer);
+
         uint8 priceFeedDecimals = priceFeed.decimals();
 
-        return _scalePriceToTargetDecimals(uint256(answer), priceFeedDecimals);
+        return _scalePriceToTargetDecimals(unsignedAnswer, priceFeedDecimals);
     }
 
     // 1000000000

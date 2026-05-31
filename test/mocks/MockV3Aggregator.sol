@@ -17,11 +17,11 @@ contract MockV3Aggregator is AggregatorV3Interface {
     uint8 public decimals;
     int256 public latestAnswer;
     uint256 public latestTimestamp;
-    uint256 public latestRound;
+    uint80 public latestRound;
 
-    mapping(uint256 => int256) public getAnswer;
-    mapping(uint256 => uint256) public getTimestamp;
-    mapping(uint256 => uint256) private getStartedAt;
+    mapping(uint80 => int256) public getAnswer;
+    mapping(uint80 => uint256) public getTimestamp;
+    mapping(uint80 => uint256) private getStartedAt;
 
     constructor(uint8 _decimals, int256 _initialAnswer) {
         decimals = _decimals;
@@ -59,13 +59,7 @@ contract MockV3Aggregator is AggregatorV3Interface {
         view
         returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)
     {
-        return (
-            uint80(latestRound),
-            getAnswer[latestRound],
-            getStartedAt[latestRound],
-            getTimestamp[latestRound],
-            uint80(latestRound)
-        );
+        return (latestRound, getAnswer[latestRound], getStartedAt[latestRound], getTimestamp[latestRound], latestRound);
     }
 
     function description() external pure returns (string memory) {

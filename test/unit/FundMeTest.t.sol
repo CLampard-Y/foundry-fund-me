@@ -201,27 +201,7 @@ contract FundMeTest is Test {
         assert((numberOfFunders + 1) * SEND_VALUE == fundMe.getOwnerAddress().balance - startingOwnerBalance);
     }
 
-    function testWithdrawFromMultipleFundersCheaper() public funded {
-        uint160 numberOfFunders = NUMBER_OF_FUNDERS;
-        uint160 startingFunderIndex = 1;
-        for (uint160 i = startingFunderIndex; i < numberOfFunders + startingFunderIndex; i++) {
-            // we get hoax from stdcheats
-            hoax(address(i), SEND_VALUE);
-            fundMe.fund{value: SEND_VALUE}();
-        }
-
-        uint256 startingFundMeBalance = address(fundMe).balance;
-        uint256 startingOwnerBalance = fundMe.getOwnerAddress().balance;
-
-        vm.startPrank(fundMe.getOwnerAddress());
-        fundMe.withdraw();
-        vm.stopPrank();
-
-        assert(address(fundMe).balance == 0);
-        assert(startingFundMeBalance + startingOwnerBalance == fundMe.getOwnerAddress().balance);
-        assert((numberOfFunders + 1) * SEND_VALUE == fundMe.getOwnerAddress().balance - startingOwnerBalance);
-    }
-
+    // Debug
     function testPrintStorageData() public view {
         for (uint256 i = 0; i < 3; i++) {
             bytes32 value = vm.load(address(fundMe), bytes32(i));
