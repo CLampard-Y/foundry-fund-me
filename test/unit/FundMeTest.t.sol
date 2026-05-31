@@ -8,6 +8,9 @@ import {FundMe} from "../../src/FundMe.sol";
 import {DeployFundMe} from "../../script/DeployFundMe.s.sol";
 
 contract FundMeTest is Test {
+    event Funded(address indexed funder, uint256 amount);
+    event Withdrawn(address indexed owner, uint256 amount);
+
     FundMe fundMe;
 
     address alice = makeAddr("alice");
@@ -34,6 +37,32 @@ contract FundMeTest is Test {
         _;
     }
 
+    function testFundFailsWithoutEnoughETH() public {
+        vm.expectRevert(FundMe.FundMe__NotEnoughFunds.selector);
+        fundMe.fund{value: 1}();
+    }
+
+    function testFundEmitFundedEvent() public {
+        vm.expectEmit(true, false, false, true, address(fundMe));
+        emit Funded(alice, SEND_VALUE);
+
+        vm.prank(alice);
+        fundMe.fund{value: SEND_VALUE}();
+    }
+
+    //function testIsFunder
+
+    function testWithdrawEmitWithdrawnEvent() public funded {
+        address owner = fundMe.getOwnerAddress();
+        uint256 amount = address(fundMe).balance;
+
+        vm.expectEmit(true, false, false, true, address(fundMe));
+        emit Withdrawn(owner, amount);
+
+        vm.prank(owner);
+        fundMe.withdraw();
+    }
+
     function testMinimumDollarIsFive() public view {
         assertEq(fundMe.getMinimumUsd(), 5e18);
     }
@@ -52,16 +81,41 @@ contract FundMeTest is Test {
         }
     }
 
-    function testFundFailsWithoutEnoughETH() public {
-        vm.expectRevert(FundMe.FundMe__NotEnoughFunds.selector);
-        fundMe.fund{value: 1}();
-    }
-
     function testFundUpdatesFundDataStructure() public {
         vm.prank(alice);
         fundMe.fund{value: SEND_VALUE}();
         uint256 amountFunded = fundMe.getAmountFundedByAddress(alice);
         assertEq(amountFunded, SEND_VALUE);
+    }
+
+    function testSameFunderIsOnlyAddedOnce() public {
+        vm.startPrank(alice);
+        fundMe.fund{value: SEND_VALUE}();
+        fundMe.fund{value: SEND_VALUE}();
+        vm.stopPrank();
+
+        assertEq(fundMe.getFundersLength(), 1);
+        assertEq(fundMe.getFunderAddressByIndex(0), alice);
+    }
+
+    function testSameFunderAmountStillAccumulates() public {
+        vm.startPrank(alice);
+        fundMe.fund{value: SEND_VALUE}();
+        fundMe.fund{value: SEND_VALUE}();
+        vm.stopPrank();
+
+        assertEq(fundMe.getAmountFundedByAddress(alice), 2 * SEND_VALUE);
+    }
+
+    function testFunderCanBeAddedAgainAfterWithdraw() public funded {
+        vm.prank(fundMe.getOwnerAddress());
+        fundMe.withdraw();
+
+        vm.prank(alice);
+        fundMe.fund{value: SEND_VALUE}();
+
+        assertEq(fundMe.getFundersLength(), 1);
+        assertEq(fundMe.getFunderAddressByIndex(0), alice);
     }
 
     function testAddsFunderToArrayOfFunders() public {
@@ -85,7 +139,8 @@ contract FundMeTest is Test {
         */
 
         // NEW VERSION WITH modifier funded()
-        vm.expectRevert();
+        vm.expectRevert(FundMe.FundMe__NotOwner.selector);
+        vm.prank(alice);
         fundMe.withdraw();
     }
 
@@ -164,5 +219,39 @@ contract FundMeTest is Test {
             console.logBytes32(value);
         }
         console.log("PriceFeed address:", address(fundMe.getPriceFeed()));
+    }
+
+    // Test receive() & fallback() functions
+    function testReceiveFundsContract() public {
+        vm.prank(alice);
+        (bool success,) = payable(address(fundMe)).call{value: SEND_VALUE}("");
+
+        assertTrue(success);
+        assertEq(fundMe.getAmountFundedByAddress(alice), SEND_VALUE);
+        assertEq(address(fundMe).balance, SEND_VALUE);
+    }
+
+    function testFallbackFundsContract() public {
+        vm.prank(alice);
+        (bool success,) = payable(address(fundMe)).call{value: SEND_VALUE}("some calldata");
+
+        assertTrue(success);
+        assertEq(fundMe.getAmountFundedByAddress(alice), SEND_VALUE);
+        //assertEq(fundMe.getOwnerAddress().balance, SEND_VALUE);
+        assertEq(address(fundMe).balance, SEND_VALUE);
+    }
+
+    function testReceiveFailsWithoutEnoughEth() public {
+        vm.prank(alice);
+        (bool success,) = payable(address(fundMe)).call{value: 1}("");
+
+        assertFalse(success);
+    }
+
+    function testFallbackFailsWithoutEnoughEth() public {
+        vm.prank(alice);
+        (bool success,) = payable(address(fundMe)).call{value: 1}("some calldata");
+
+        assertFalse(success);
     }
 }
