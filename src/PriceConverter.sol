@@ -6,8 +6,8 @@ import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interf
 // Why is this a library and not abstract?
 // Why not an interface?
 library PriceConverter {
-    error PriceConverter_InvalidPrice();
-    error PriceConverter_StalePrice();
+    error PriceConverter__InvalidPrice();
+    error PriceConverter__StalePrice();
 
     uint256 private constant STALE_PRICE_TIMEOUT = 3 hours;
     uint8 private constant TARGET_DECIMALS = 18;
@@ -31,9 +31,9 @@ library PriceConverter {
         (, int256 answer,, uint256 updatedAt,) = priceFeed.latestRoundData();
         // ETH/USD rate in 18 digit
         //require(answer > 0, "Invalid price");
-        if (answer <= 0) revert PriceConverter_InvalidPrice();
+        if (answer <= 0) revert PriceConverter__InvalidPrice();
         if (updatedAt == 0 || updatedAt > block.timestamp || block.timestamp - updatedAt > STALE_PRICE_TIMEOUT) {
-            revert PriceConverter_StalePrice();
+            revert PriceConverter__StalePrice();
         }
 
         uint8 priceFeedDecimals = priceFeed.decimals();
