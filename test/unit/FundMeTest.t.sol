@@ -28,6 +28,11 @@ contract FundMeTest is Test {
         vm.deal(alice, STARTING_BALANCE);
     }
 
+    function testConstructorRevertsIfPriceFeedIsZeroAddress() public {
+        vm.expectRevert(FundMe.FundMe__InvalidPriceFeed.selector);
+        new FundMe(address(0));
+    }
+
     modifier funded() {
         vm.prank(alice);
         fundMe.fund{value: SEND_VALUE}();
@@ -49,8 +54,6 @@ contract FundMeTest is Test {
         vm.prank(alice);
         fundMe.fund{value: SEND_VALUE}();
     }
-
-    //function testIsFunder
 
     function testWithdrawEmitWithdrawnEvent() public funded {
         address owner = fundMe.getOwnerAddress();
@@ -105,6 +108,13 @@ contract FundMeTest is Test {
         vm.stopPrank();
 
         assertEq(fundMe.getAmountFundedByAddress(alice), 2 * SEND_VALUE);
+    }
+
+    function testWithdrawResetsFunderAmount() public funded {
+        vm.prank(fundMe.getOwnerAddress());
+        fundMe.withdraw();
+
+        assertEq(fundMe.getAmountFundedByAddress(alice), 0);
     }
 
     function testFunderCanBeAddedAgainAfterWithdraw() public funded {

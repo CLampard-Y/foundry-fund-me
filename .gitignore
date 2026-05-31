@@ -17,3 +17,7 @@ docs/
 # Dotenv file
 .env
 
+# Local settings
+.vscode/
+remappings.txt
+
