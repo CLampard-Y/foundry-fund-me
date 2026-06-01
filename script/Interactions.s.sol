@@ -35,7 +35,7 @@ contract FundFundMe is Script, InteractionValidator {
         /*
         if (msg.sender.balance < SEND_VALUE) {
             revert Interactions__InsufficientBalance(msg.sender, msg.sender.balance, SEND_VALUE);
-        
+
         vm.startBroadcast();
         FundMe(payable(fundMeAddress)).fund{value: SEND_VALUE}();
         vm.stopBroadcast();
