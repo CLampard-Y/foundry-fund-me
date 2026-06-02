@@ -1,10 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-// Note: The AggregatorV3Interface might be at a different location than what was in the video!
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 import {PriceConverter} from "./PriceConverter.sol";
 
+/// @title FundMe
+/// @notice Allows users to fund the contract with ETH.
+///         (if the USD value meets a minimum threshold)
+/// @dev Use Chainlink-compatible ETH/USD price feed to convert ETH amounts into USD terms.
 contract FundMe {
     // custom errors
     error FundMe__NotOwner();
@@ -21,14 +24,14 @@ contract FundMe {
     mapping(address => bool) private s_isFunder;
     address[] private s_funders;
 
-    // Could we make this constant?  /* hint: no! We should make it immutable! */
     address private immutable i_owner;
-    // immutable is a constant variable that cannot be changed
-    // Once it is set, it cannot be changed
     AggregatorV3Interface private immutable i_priceFeed;
     // Minimun amount of USD to fund is 5 USD
     uint256 private constant MINIMUM_USD = 5 * 1e18;
 
+    /// @notice Initializes contract with the ETH/USD price feed.
+    /// @dev The initial deployer becomes the immutable owner. Reverts if the price feed is zero.
+    /// @param priceFeed Address of a Chainlink-compatible ETH/USD price feed.
     constructor(address priceFeed) {
         if (priceFeed == address(0)) {
             revert FundMe__InvalidPriceFeed();
@@ -36,7 +39,11 @@ contract FundMe {
         i_owner = msg.sender;
         i_priceFeed = AggregatorV3Interface(priceFeed);
     }
-
+    
+    /// @notice Funds the contract with ETH if meets the minimum USD threshold.
+    /// @dev Uses configured price feed to validate msg.value. Tracks each unique funder once while accumulating total funded amout.
+    /// @dev Reverts with FundMe__NotEnoughFunds if msg.value converts to less than the minimum USD amount.
+    /// @dev Emits a Funded on success. 
     function fund() public payable {
         if (msg.value.getConversionRate(i_priceFeed) < MINIMUM_USD) {
             revert FundMe__NotEnoughFunds();
@@ -63,47 +70,12 @@ contract FundMe {
         _;
     }
 
-    // Old version (more gas)
-    /*
+    /// @notice Withdraws the full contract balance to the owner.
+    /// @dev Only callable by owner. Resets the funder accounting before transferring ETH.
+    /// @dev Uses call to send ETH to owner. Reverts with FundMe__CallFailed if call fails.
+    /// @dev Emits a Withdrawn event on success.
     function withdraw() public onlyOwner {
-        for (
-            uint256 funderIndex = 0;
-            funderIndex < s_funders.length;
-            funderIndex++
-        ) {
-            address funder = s_funders[funderIndex];
-            s_addressToAmountFunded[funder] = 0;
-        }
-        s_funders = new address[](0);
-        // // transfer
-        // payable(msg.sender).transfer(address(this).balance);
-
-        // // send
-        // bool sendSuccess = payable(msg.sender).send(address(this).balance);
-        // require(sendSuccess, "Send failed");
-
-        // call
-        (bool callSuccess,) = payable(msg.sender).call{value: address(this).balance}("");
-        require(callSuccess, "Call failed");
-    }
-
-
-    // Explainer from: https://solidity-by-example.org/fallback/
-    // Conditon: Ether is sent to contract
-    //      is msg.data empty?
-    //          /   \
-    //         yes  no
-    //         /     \
-    //    receive()?  fallback()
-    //     /   \
-    //   yes   no
-    //  /        \
-    //receive()  fallback()
-    */
-
-    // Cheaper version
-    function withdraw() public onlyOwner {
-        // key difference: we don't need to read length of array every time
+        // don't need to read length of array every time
         uint256 fundersLength = s_funders.length;
         for (uint256 funderindex = 0; funderindex < fundersLength; funderindex++) {
             address funder = s_funders[funderindex];
@@ -122,11 +94,26 @@ contract FundMe {
         emit Withdrawn(msg.sender, amount);
     }
 
-    // ?
+    // Explainer from: https://solidity-by-example.org/fallback/
+    // Conditon: Ether is sent to contract
+    //      is msg.data empty?
+    //          /   \
+    //         yes  no
+    //         /     \
+    //    receive()?  fallback()
+    //     /   \
+    //   yes   no
+    //  /        \
+    //receive()  fallback()
+
+    /// @notice Handle ETH transfers with unknown calldata and routes them through fund().
+    /// @dev Reverts under same conditions as fund(). Non-empty calldata does not bypass funding validation.
     fallback() external payable {
         fund();
     }
 
+    /// @notice Handle plain ETH transfers and routes them through fund().
+    /// @dev Reverts under same conditions as fund(), including the minimum USD requirement. 
     receive() external payable {
         fund();
     }
@@ -134,36 +121,38 @@ contract FundMe {
     /**
      * Getter Functions
      */
+
+    /// @notice Returns the minimum funding threshold in USD with 18 decimals.
     function getMinimumUsd() public pure returns (uint256) {
         return MINIMUM_USD;
     }
 
+    /// @notice Returns the total amount of ETH funded by specific address.
+    /// @param fundingAddress Address of the funder.
+    /// @return Amount of ETH funded by the address, denominated in wei.
     function getAmountFundedByAddress(address fundingAddress) public view returns (uint256) {
         return s_addressToAmountFunded[fundingAddress];
     }
-
+    
+    /// @notice Returns the address of funder stored at a specific index.
+    /// @param index Index in the funders array.
+    /// @return Address of the funder at the given index.
     function getFunderAddressByIndex(uint256 index) public view returns (address) {
         return s_funders[index];
     }
 
+    /// @notice Returns the length of the funders array.
     function getFundersLength() public view returns (uint256) {
         return s_funders.length;
     }
 
+    /// @notice Returns the owner address.
     function getOwnerAddress() public view returns (address) {
         return i_owner;
     }
 
+    /// @notice Returns the configured ETH/USD price feed.
     function getPriceFeed() public view returns (AggregatorV3Interface) {
         return i_priceFeed;
     }
 }
-
-// Concepts we didn't cover yet (will cover in later sections)
-// 1. Enum
-// 2. Events
-// 3. Try / Catch
-// 4. Function Selector
-// 5. abi.encode / decode
-// 6. Hash with keccak256
-// 7. Yul / Assembly
