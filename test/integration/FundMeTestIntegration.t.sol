@@ -3,7 +3,12 @@
 pragma solidity ^0.8.19;
 
 import {DeployFundMe} from "../../script/DeployFundMe.s.sol";
-import {FundFundMe, WithdrawFundMe} from "../../script/Interactions.s.sol";
+import {
+    FundFundMe,
+    WithdrawFundMe,
+    Interactions__InvalidFundMeAddress,
+    Interactions__FundMeAddressHasNoCode
+} from "../../script/Interactions.s.sol";
 import {FundMe} from "../../src/FundMe.sol";
 import {Test} from "forge-std/Test.sol";
 
@@ -28,5 +33,21 @@ contract InteractionsTest is Test {
         withdrawFundMe.withdrawFundMe(fundMeAddress);
 
         assertEq(fundMeAddress.balance, 0);
+    }
+
+    function testFundInteractionRevertsWhenFundMeAddressIsZero() public {
+        FundFundMe fundFundMe = new FundFundMe();
+
+        vm.expectRevert(Interactions__InvalidFundMeAddress.selector);
+        fundFundMe.fundFundMe(address(0));
+    }
+
+    function testFundInteractionRevertsWhenFundMeAddressHasNoCode() public {
+        FundFundMe fundFundMe = new FundFundMe();
+        address user = makeAddr("user");
+
+        vm.expectRevert(abi.encodeWithSelector(Interactions__FundMeAddressHasNoCode.selector, user));
+
+        fundFundMe.fundFundMe(user);
     }
 }

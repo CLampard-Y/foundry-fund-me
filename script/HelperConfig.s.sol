@@ -52,14 +52,10 @@ contract HelperConfig is Script {
     }
 
     function getSepoliaEthConfig() public pure returns (NetworkConfig memory) {
-        // price feed address
-        NetworkConfig memory sepoliaConfig = NetworkConfig({priceFeed: SEPOLIA_ETH_USD_PRICE_FEED});
-        return sepoliaConfig;
+        return NetworkConfig({priceFeed: SEPOLIA_ETH_USD_PRICE_FEED});
     }
 
     function getOrCreateAnvilEthConfig() public returns (NetworkConfig memory) {
-        // price feed address
-
         // Idempotent
         // address(0): Zero address of Solidity (Default)
         if (s_localNetworkConfig.priceFeed != address(0)) {
@@ -78,8 +74,6 @@ contract HelperConfig is Script {
     }
 
     function getMainnetEthConfig() public pure returns (NetworkConfig memory) {
-        // price feed address
-        NetworkConfig memory mainnetConfig = NetworkConfig({priceFeed: MAINNET_ETH_USD_PRICE_FEED});
-        return mainnetConfig;
+        return NetworkConfig({priceFeed: MAINNET_ETH_USD_PRICE_FEED});
     }
 }
