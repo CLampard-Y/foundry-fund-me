@@ -47,6 +47,10 @@ contract HelperConfig is Script {
         }
     }
 
+    function getActiveNetworkConfig() public view returns (NetworkConfig memory) {
+        return activeNetworkConfig;
+    }
+
     function getSepoliaEthConfig() public pure returns (NetworkConfig memory) {
         // price feed address
         NetworkConfig memory sepoliaConfig = NetworkConfig({priceFeed: SEPOLIA_ETH_USD_PRICE_FEED});

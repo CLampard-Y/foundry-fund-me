@@ -9,7 +9,8 @@ import {HelperConfig} from "./HelperConfig.s.sol";
 contract DeployFundMe is Script {
     function run() external returns (FundMe) {
         HelperConfig helperConfig = new HelperConfig();
-        address ethUsdPriceFeed = helperConfig.activeNetworkConfig();
+        HelperConfig.NetworkConfig memory config = helperConfig.getActiveNetworkConfig();
+        address ethUsdPriceFeed = config.priceFeed;
         vm.startBroadcast();
         //FundMe fundme = new FundMe();    Unused variable
         FundMe fundMe = new FundMe(ethUsdPriceFeed);

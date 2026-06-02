@@ -25,7 +25,7 @@ contract HelperConfigTest is Test {
         new HelperConfig();
     }
 
-    function testReturnsSepoliaConfigWhenCHainIdIsSepolia() public {
+    function testReturnsSepoliaConfigWhenChainIdIsSepolia() public {
         vm.chainId(SEPOLIA_CHAINID);
 
         HelperConfig helperConfig = new HelperConfig();
@@ -42,5 +42,25 @@ contract HelperConfigTest is Test {
 
         assertTrue(priceFeed != address(0));
         assertTrue(priceFeed.code.length > 0);
+    }
+
+    function testReturnsMainnetConfigWhenChainIdIsMainnet() public {
+        vm.chainId(MAINNET_CHAINID);
+
+        HelperConfig helperConfig = new HelperConfig();
+        address priceFeed = helperConfig.activeNetworkConfig();
+
+        assertEq(priceFeed, MAINNET_ETH_USD_PRICE_FEED);
+    }
+
+    function testAnvilConfigIsReusedAfterFirstCreation() public {
+        vm.chainId(ANVIL_CHAINID);
+
+        HelperConfig helperConfig = new HelperConfig();
+        address firstPriceFeed = helperConfig.activeNetworkConfig();
+
+        HelperConfig.NetworkConfig memory secondConfig = helperConfig.getOrCreateAnvilEthConfig();
+
+        assertEq(secondConfig.priceFeed, firstPriceFeed);
     }
 }
