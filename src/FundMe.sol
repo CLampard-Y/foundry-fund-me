@@ -26,7 +26,7 @@ contract FundMe {
 
     address private immutable i_owner;
     AggregatorV3Interface private immutable i_priceFeed;
-    // Minimun amount of USD to fund is 5 USD
+    // Minimum amount of USD to fund is 5 USD
     uint256 private constant MINIMUM_USD = 5 * 1e18;
 
     /// @notice Initializes contract with the ETH/USD price feed.
@@ -39,11 +39,11 @@ contract FundMe {
         i_owner = msg.sender;
         i_priceFeed = AggregatorV3Interface(priceFeed);
     }
-    
-    /// @notice Funds the contract with ETH if meets the minimum USD threshold.
-    /// @dev Uses configured price feed to validate msg.value. Tracks each unique funder once while accumulating total funded amout.
+
+    /// @notice Funds the contract with ETH if the sent amountmeets the minimum USD threshold.
+    /// @dev Uses configured price feed to validate msg.value. Tracks each unique funder once while accumulating total funded amount.
     /// @dev Reverts with FundMe__NotEnoughFunds if msg.value converts to less than the minimum USD amount.
-    /// @dev Emits a Funded on success. 
+    /// @dev Emits a Funded on success.
     function fund() public payable {
         if (msg.value.getConversionRate(i_priceFeed) < MINIMUM_USD) {
             revert FundMe__NotEnoughFunds();
@@ -60,6 +60,7 @@ contract FundMe {
         emit Funded(msg.sender, msg.value);
     }
 
+    /// @notice Returns the version of the configured price feed.
     function getVersion() public view returns (uint256) {
         return i_priceFeed.version();
     }
@@ -106,14 +107,14 @@ contract FundMe {
     //  /        \
     //receive()  fallback()
 
-    /// @notice Handle ETH transfers with unknown calldata and routes them through fund().
+    /// @notice Handles ETH transfers with unknown calldata and routes them through fund().
     /// @dev Reverts under same conditions as fund(). Non-empty calldata does not bypass funding validation.
     fallback() external payable {
         fund();
     }
 
-    /// @notice Handle plain ETH transfers and routes them through fund().
-    /// @dev Reverts under same conditions as fund(), including the minimum USD requirement. 
+    /// @notice Handles plain ETH transfers and routes them through fund().
+    /// @dev Reverts under same conditions as fund(), including the minimum USD requirement.
     receive() external payable {
         fund();
     }
@@ -133,7 +134,7 @@ contract FundMe {
     function getAmountFundedByAddress(address fundingAddress) public view returns (uint256) {
         return s_addressToAmountFunded[fundingAddress];
     }
-    
+
     /// @notice Returns the address of funder stored at a specific index.
     /// @param index Index in the funders array.
     /// @return Address of the funder at the given index.

@@ -5,6 +5,10 @@ import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interf
 
 // Why is this a library and not abstract?
 // Why not an interface?
+
+/// @title PriceConverter
+/// @notice Provides helper functions for converting ETH amounts to USD values.
+/// @dev Assumes a Chainlink-compatible feed and validates price positivity and freshness before conversion.
 library PriceConverter {
     error PriceConverter__InvalidPrice();
     error PriceConverter__StalePrice();
@@ -12,8 +16,10 @@ library PriceConverter {
     uint256 private constant STALE_PRICE_TIMEOUT = 3 hours;
     uint8 private constant TARGET_DECIMALS = 18;
 
-    // We could make this public, but then we'd have to deploy it
-    // Read ETH/USD price from Chainlink price feed
+    /// @notice Read the latest ETH/USD price from Chainlink price feed.
+    /// @dev Reverts if the price is non-positive, missing, from the future or stale.
+    /// @param priceFeed Chainlink-compatible price feed used for the ETH/USD price.
+    /// @return ETH/USD price scaled to target decimals (default 18 decimals).
     function getPrice(AggregatorV3Interface priceFeed) internal view returns (uint256) {
         // Sepolia ETH / USD Address
         // https://docs.chain.link/data-feeds/price-feeds/addresses
@@ -56,7 +62,11 @@ library PriceConverter {
         return _scalePriceToTargetDecimals(unsignedAnswer, priceFeedDecimals);
     }
 
-    // 1000000000
+    /// @notice Converts an ETH amount into its USD value using the provided price feed.
+    /// @dev The returned USD value uses 18 decimals. Reverts under the same oracle validation rules as getPrice().
+    /// @param ethAmount ETH amount denominated in wei.
+    /// @param priceFeed Chainlink-compatible ETH/USD price feed.
+    /// @return USD value of the ETH amount, scaled to 18 decimals.
     function getConversionRate(uint256 ethAmount, AggregatorV3Interface priceFeed) internal view returns (uint256) {
         uint256 ethPrice = getPrice(priceFeed);
         uint256 ethAmountInUsd = (ethPrice * ethAmount) / 1e18;
@@ -64,6 +74,7 @@ library PriceConverter {
         return ethAmountInUsd;
     }
 
+    /// @dev Scales a price value from its feed decimals to the library target decimals.
     function _scalePriceToTargetDecimals(uint256 price, uint8 priceDecimals) private pure returns (uint256) {
         if (priceDecimals <= TARGET_DECIMALS) {
             return price * 10 ** (TARGET_DECIMALS - priceDecimals);
