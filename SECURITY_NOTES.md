@@ -25,6 +25,8 @@ The primary security boundary is the `FundMe` ETH funding and owner withdrawal f
 
 This document does not cover third-party dependency internals such as Chainlink contracts, `forge-std`, or `foundry-devops`, except where this project directly relies on their behavior.
 
+Latest local verification evidence is recorded in [`evidence/2026-06-07-command-log.md`](./evidence/2026-06-07-command-log.md).
+
 ## Assets
 
 - ETH held by the `FundMe` contract balance.

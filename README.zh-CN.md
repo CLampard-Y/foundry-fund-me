@@ -25,7 +25,7 @@
 | 项目 | 当前状态 |
 | --- | --- |
 | 合约开发 | 核心功能已完成 |
-| 本地验证 | `make all`、`forge build --sizes`、`forge coverage` 已通过 |
+| 本地验证 | `make all`、`forge build --sizes`、`forge coverage`、`forge snapshot` 已在本地通过；见 [`evidence/2026-06-07-command-log.md`](./evidence/2026-06-07-command-log.md) |
 | CI | GitHub Actions 已配置 |
 | NatSpec | 核心合约与 `PriceConverter` 已补充，脚本/配置仍可继续完善 |
 | Makefile | 已完成主要安全清理，支持 fmt/build/test/deploy/fund/withdraw 等入口 |
@@ -371,15 +371,16 @@ cast wallet import <account-name> --interactive
 
 ### 当前验证快照
 
+最新本地快照：[`evidence/2026-06-07-command-log.md`](./evidence/2026-06-07-command-log.md)
+
 以下结果为本地环境验证快照：
 
 ```text
-2026-06-03:
+2026-06-07:
 - make all: passed
 - forge build --sizes: passed
-
-2026-06-04:
 - forge coverage: passed
+- forge snapshot: passed
 ```
 
 `make all` 测试结果：
@@ -407,7 +408,7 @@ Ran 5 test suites:
 
 ### Coverage Snapshot
 
-以下结果来自 `2026-06-04` 本地运行的 `forge coverage`：
+以下结果来自 `2026-06-07` 本地运行的 `forge coverage`：
 
 | File | % Lines | % Statements | % Branches | % Funcs |
 | --- | ---: | ---: | ---: | ---: |

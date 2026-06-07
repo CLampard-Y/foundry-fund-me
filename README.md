@@ -19,7 +19,7 @@ This repository is intended as a learning project and portfolio-quality Foundry 
 | Area | Status |
 | --- | --- |
 | Contract development | Core functionality completed |
-| Local verification | `make all`, `forge build --sizes`, and `forge coverage` passed |
+| Local verification | `make all`, `forge build --sizes`, `forge coverage`, and `forge snapshot` passed locally; see [`evidence/2026-06-07-command-log.md`](./evidence/2026-06-07-command-log.md) |
 | CI | GitHub Actions configured |
 | NatSpec | Core contract and `PriceConverter` documented; scripts/config can be improved further |
 | Makefile | Main cleanup completed; supports fmt/build/test/deploy/fund/withdraw workflows |
@@ -364,15 +364,16 @@ cast wallet import <account-name> --interactive
 
 ### Current Verification Snapshot
 
+Latest local snapshot: [`evidence/2026-06-07-command-log.md`](./evidence/2026-06-07-command-log.md)
+
 Local verification history:
 
 ```text
-2026-06-03:
+2026-06-07:
 - make all: passed
 - forge build --sizes: passed
-
-2026-06-04:
 - forge coverage: passed
+- forge snapshot: passed
 ```
 
 `make all` test result:
@@ -400,7 +401,7 @@ Ran 5 test suites:
 
 ### Coverage Snapshot
 
-Result from local `forge coverage` on `2026-06-04`:
+Result from local `forge coverage` on `2026-06-07`:
 
 | File | % Lines | % Statements | % Branches | % Funcs |
 | --- | ---: | ---: | ---: | ---: |

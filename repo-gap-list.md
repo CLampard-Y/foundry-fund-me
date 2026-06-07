@@ -9,7 +9,7 @@ It is not an audit report, a deployment record, or a claim of production readine
 
 | Item | Result |
 | --- | --- |
-| Current HEAD | `a8e0be9a7283102a93acdc3557d0afb3d3f7a830` |
+| Current HEAD | `f9ba3b6` |
 | Latest verification date | `2026-06-07` |
 | `make all` | PASS, `40` tests / `5` suites |
 | `forge coverage` | PASS, `90.97%` lines, `90.44%` statements, `90.00%` branches, `88.57%` funcs |
@@ -26,7 +26,7 @@ It is not an audit report, a deployment record, or a claim of production readine
 
 - Latest command log: [`evidence/2026-06-07-command-log.md`](./evidence/2026-06-07-command-log.md)
 - Latest test output: `make all`, `forge coverage`, `forge build --sizes`, `forge snapshot`
-- Latest commit hash: `a8e0be9a7283102a93acdc3557d0afb3d3f7a830`
+- Latest commit hash: `f9ba3b6`
 
 ## Gaps
 
@@ -47,4 +47,3 @@ It is not an audit report, a deployment record, or a claim of production readine
 - Usable as a learning and portfolio baseline: yes
 - Ready for real funds without more work: no
 - Main remaining work is operational confidence, live-network validation, and adversarial test coverage
-
