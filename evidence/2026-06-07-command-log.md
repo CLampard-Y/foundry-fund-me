@@ -4,35 +4,53 @@
 
 `/root/code/solidity/foundry-fund-me`
 
+## GitHub / Commit Status
+
+Final verification baseline:
+
+```text
+Current HEAD: 3e16ed12342da0eea34868672e26ea2f82032e59
+Local origin/main: 3e16ed12342da0eea34868672e26ea2f82032e59
+GitHub main: 3e16ed12342da0eea34868672e26ea2f82032e59 refs/heads/main
+Latest commit: 3e16ed1 docs: sync latest verification evidence
+```
+
+Commands used:
+
+```text
+git rev-parse HEAD origin/main
+git branch -vv
+git ls-remote origin refs/heads/main
+```
+
 ## Git Status
 
-On branch main
-Your branch is ahead of `origin/main` by 1 commit.
-  (use `git push` to publish your local commits)
+Observed before the final edit to this log file:
 
-Changes not staged for commit:
-  (use `git add <file>...` to update what will be committed)
-	modified:   README.md
-	modified:   README.zh-CN.md
-	modified:   SECURITY_NOTES.md
-	modified:   TESTING.md
-	modified:   repo-gap-list.md
+```text
+## main...origin/main
+?? TESTING-FACT-EXTRACTION.md
+?? evidence/2026-06-06-security-notes-fact-extraction.md
+```
 
-Untracked files:
-  (use `git add <file>...` to include in what will be committed)
-	TESTING-FACT-EXTRACTION.md
-	evidence/2026-06-06-security-notes-fact-extraction.md
+Tracked diff status:
 
-no changes added to commit (use "git add" and/or "git commit -a")
+```text
+git diff --stat
+```
+
+Result: no tracked file diff was reported before this command log was updated.
+
+The two untracked files are local fact-extraction notes and are not part of this verification baseline.
 
 ## Recent Commits
 
 ```text
+3e16ed1 docs: sync latest verification evidence
 f9ba3b6 docs: update verification evidence and gap register
 a8e0be9 docs: expand FundMe testing documentation
 1e2fea5 docs: add FundMe testing guide
 48153ea docs: document FundMe security posture
-d2c0071 docs: replace default README with project guide
 ```
 
 ## Foundry Versions
@@ -128,10 +146,31 @@ remappings = [
 
 ## Verification Results
 
+Commands were run against commit `3e16ed12342da0eea34868672e26ea2f82032e59`.
+
+### `forge fmt --check`
+
+PASS
+
+Result: command exited successfully with no formatting diff output.
+
+### `forge build`
+
+PASS
+
+Result: command exited successfully. A later `make all` run performed a clean rebuild.
+
+### `forge test`
+
+PASS
+
+Result: `40` tests passed across `5` suites.
+
 ### `make all`
 
 PASS
 
+- `forge clean`
 - `forge fmt --check`
 - `forge build`
 - `forge test`
@@ -147,16 +186,28 @@ PASS
 - Branches: `90.00%`
 - Functions: `88.57%`
 
+Foundry emitted the expected coverage warning that optimizer settings and `viaIR` are disabled for accurate coverage reports.
+
 ### `forge build --sizes`
 
 PASS
+
+Key contract size results:
+
+- `FundMe`: runtime size `5,178 B`, runtime margin `19,398 B`
+- `MockV3Aggregator`: runtime size `2,664 B`, runtime margin `21,912 B`
+- `PriceConverter`: runtime size `85 B`, runtime margin `24,491 B`
+- `PriceConverterHarness`: runtime size `2,251 B`, runtime margin `22,325 B`
 
 ### `forge snapshot`
 
 PASS
 
+Result: `40` tests passed across `5` suites. No tracked `.gas-snapshot` diff was present after the run.
+
 ## Notes
 
-- The current repository state includes local worktree changes outside this log.
+- Local `main`, local `origin/main`, and GitHub `main` all point to commit `3e16ed12342da0eea34868672e26ea2f82032e59`.
+- Before this final log edit, the tracked worktree was clean and only two local fact-extraction files were untracked.
 - These results are a verification snapshot, not an audit or deployment record.
-
+- No public deployment or contract verification record is claimed by this evidence file.
