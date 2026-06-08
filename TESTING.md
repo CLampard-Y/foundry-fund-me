@@ -5,8 +5,6 @@
 This document describes the current testing strategy, reproducible commands, latest known local results, coverage snapshot, and test gaps for the `FundMe` project.
 
 - Project type: learning and portfolio-scale Solidity / Foundry project
-- Current commit documented: `f9ba3b6`
-- Last local verification documented: `2026-06-07`
 - Latest command log: [`evidence/2026-06-07-command-log.md`](./evidence/2026-06-07-command-log.md)
 - Deployment status: no public production deployment is claimed here
 - Assurance status: this is not an audit report, formal verification report, or production release certification

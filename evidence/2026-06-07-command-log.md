@@ -43,15 +43,6 @@ Result: no tracked file diff was reported before this command log was updated.
 
 The two untracked files are local fact-extraction notes and are not part of this verification baseline.
 
-## Recent Commits
-
-```text
-3e16ed1 docs: sync latest verification evidence
-f9ba3b6 docs: update verification evidence and gap register
-a8e0be9 docs: expand FundMe testing documentation
-1e2fea5 docs: add FundMe testing guide
-48153ea docs: document FundMe security posture
-```
 
 ## Foundry Versions
 

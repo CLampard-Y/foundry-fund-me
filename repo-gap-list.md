@@ -9,8 +9,7 @@ It is not an audit report, a deployment record, or a claim of production readine
 
 | Item | Result |
 | --- | --- |
-| Current HEAD | `f9ba3b6` |
-| Latest verification date | `2026-06-07` |
+| Latest local verification date | `2026-06-07` |
 | `make all` | PASS, `40` tests / `5` suites |
 | `forge coverage` | PASS, `90.97%` lines, `90.44%` statements, `90.00%` branches, `88.57%` funcs |
 | `forge build --sizes` | PASS |
@@ -26,7 +25,6 @@ It is not an audit report, a deployment record, or a claim of production readine
 
 - Latest command log: [`evidence/2026-06-07-command-log.md`](./evidence/2026-06-07-command-log.md)
 - Latest test output: `make all`, `forge coverage`, `forge build --sizes`, `forge snapshot`
-- Latest commit hash: `f9ba3b6`
 
 ## Gaps
 
