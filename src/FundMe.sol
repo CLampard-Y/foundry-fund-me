@@ -40,7 +40,7 @@ contract FundMe {
         i_priceFeed = AggregatorV3Interface(priceFeed);
     }
 
-    /// @notice Funds the contract with ETH if the sent amountmeets the minimum USD threshold.
+    /// @notice Funds the contract with ETH if the sent amount meets the minimum USD threshold.
     /// @dev Uses configured price feed to validate msg.value. Tracks each unique funder once while accumulating total funded amount.
     /// @dev Reverts with FundMe__NotEnoughFunds if msg.value converts to less than the minimum USD amount.
     /// @dev Emits a Funded on success.
